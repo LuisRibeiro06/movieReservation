@@ -31,7 +31,7 @@ public class Movie {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "posterImage", nullable = false)
+    @Column(name = "poster_image", nullable = false)
     private String posterImage;
 
     @Column(name = "imdb_id", nullable = false)
