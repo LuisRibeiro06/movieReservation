@@ -35,7 +35,4 @@ public class ShowTime {
     @JoinColumn(name = "CinemaRoomid")
     private CinemaRoom cinemaRoom;
 
-
-
-
 }

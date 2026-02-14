@@ -3,9 +3,12 @@ package com.movie.system.controller;
 import com.movie.system.dto.AdminDashboardDTO;
 import com.movie.system.dto.ReservationRequestDTO;
 import com.movie.system.model.Reservation;
+import com.movie.system.model.Seat;
 import com.movie.system.service.ReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +33,13 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllUserReservations(userId));
     }
 
+    @GetMapping("/occupied/{id}")
+    public ResponseEntity<List<Long>> getOccupiedSeats(@PathVariable Long showTimeId) {
+        List<Seat> occupiedSeats = reservationService.getOccupiedSeatsByShowTime(showTimeId);
+        List<Long> occupiedIds = occupiedSeats.stream().map(Seat::getId).toList();
+        return ResponseEntity.ok(occupiedIds);
+    }
+
     @PostMapping
     public ResponseEntity<Reservation> createReservation(@RequestBody ReservationRequestDTO request) {
         Reservation reservation = reservationService.createReservation(request);
@@ -37,8 +47,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{reservationId}/user/{userId}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId, @PathVariable Long userId) {
-        reservationService.cancelReservation(reservationId, userId);
+    public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId) {
+        reservationService.cancelReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

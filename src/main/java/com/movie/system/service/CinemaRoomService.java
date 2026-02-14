@@ -25,9 +25,14 @@ public class CinemaRoomService {
                 .orElseThrow(() -> new RuntimeException("Cinema room not found"));
     }
 
-    public CinemaRoom saveCinemaRoom(int capacity){
-        CinemaRoom cinemaRoom = new CinemaRoom();
-        cinemaRoom.setCapacity(capacity);
+    public CinemaRoom saveCinemaRoom(CinemaRoom cinemaRoom){
         return cinemaRoomRepository.save(cinemaRoom);
+    }
+
+    public void deleteCinemaRoom(Long id) {
+        if (!cinemaRoomRepository.existsById(id)) {
+            throw new RuntimeException("Cinema room not found");
+        }
+        cinemaRoomRepository.deleteById(id);
     }
 }

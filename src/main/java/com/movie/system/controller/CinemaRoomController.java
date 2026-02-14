@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/api/cinema-rooms")
 public class CinemaRoomController {
@@ -29,8 +29,13 @@ public class CinemaRoomController {
     }
 
     @PostMapping
-    public ResponseEntity<CinemaRoom> createCinemaRoom(@RequestBody int capacity) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cinemaRoomService.saveCinemaRoom(capacity));
+    public ResponseEntity<CinemaRoom> createCinemaRoom(@RequestBody CinemaRoom cinemaRoom) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(cinemaRoomService.saveCinemaRoom(cinemaRoom));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCinemaRoom(@PathVariable Long id) {
+        cinemaRoomService.deleteCinemaRoom(id);
+        return ResponseEntity.noContent().build();
     }
 }
-

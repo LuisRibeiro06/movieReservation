@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.movie.system.model.User;
-import org.bouncycastle.math.ec.rfc8032.Ed25519;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +12,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-
 @Service
 public class TokenService {
-
 
     @Value("${api.security.token.secret}")
     private String secretKey;
@@ -24,17 +21,14 @@ public class TokenService {
     public String generateToken(User user){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
-
             String role = (user.getRole() != null) ? user.getRole().getName() : "USER";
-
-            String token = JWT.create()
+            return JWT.create()
                     .withIssuer("Movie Reservation")
                     .withSubject(user.getUsername())
                     .withClaim("role", role)
                     .withExpiresAt(generateExpirationDate())
                     .sign(algorithm);
-            return token;
-        }catch (JWTCreationException exception){
+        } catch (JWTCreationException exception){
             throw new RuntimeException("Error while generating token", exception);
         }
     }
@@ -47,8 +41,8 @@ public class TokenService {
                     .build()
                     .verify(token)
                     .getSubject();
-        }catch (JWTVerificationException exception){
-            return "";
+        } catch (JWTVerificationException exception){
+            throw new JWTVerificationException("Error while validating token", exception);
         }
     }
 
@@ -61,7 +55,7 @@ public class TokenService {
                     .verify(token)
                     .getClaim("role").asString();
         } catch (JWTVerificationException exception){
-            return "";
+            throw new JWTVerificationException("Error while validating token", exception);
         }
     }
 

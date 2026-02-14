@@ -28,11 +28,11 @@ public class Reservation {
     private BigDecimal totalPrice;
 
     @ManyToOne
-    @JoinColumn(name = "ShowTimeid", nullable = false)
+    @JoinColumn(name = "show_time_id", nullable = false)
     private ShowTime showTime;
 
     @ManyToOne
-    @JoinColumn(name = "Userid", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
