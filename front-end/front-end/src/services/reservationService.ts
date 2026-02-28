@@ -15,6 +15,16 @@ export const cancelReservation = async (reservationId: number) => {
     await api.delete(`/reservations/${reservationId}`);
 }
 
+export const getReservationById = async (reservationId: number) => {
+    const response = await api.get(`/reservations/${reservationId}`);
+    return response.data;
+}
+
+export const checkoutReservation = async (reservationId: number) => {
+    const response = await api.post(`/reservations/${reservationId}/checkout`);
+    return response.data;
+};
+
 export const getAdminDashboard = async (): Promise<AdminDashboard> => {
     const response = await api.get('/reservations/admin/dashboard');
     return response.data;

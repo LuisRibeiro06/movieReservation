@@ -39,6 +39,9 @@ public class Reservation {
     @Column(name = "Status", nullable = false)
     private ReservationStatus status;
 
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @ManyToMany
     @JoinTable(
             name = "Reservation_Seat", // Nome da tabela de ligação no SQL

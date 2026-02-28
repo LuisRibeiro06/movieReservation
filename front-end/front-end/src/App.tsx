@@ -13,6 +13,7 @@ import AdminSessions from "./pages/AdminSessions.tsx";
 import AdminCinemaRooms from "./pages/AdminCinemaRooms.tsx";
 import AdminDashboardPage from "./pages/AdminDashboard.tsx";
 import SessionPage from "./pages/SessionPage.tsx";
+import CartPage from "./pages/CartPage.tsx";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/movie/:id" element={<MoviePage />} />
             <Route path="/sessions" element={<SessionsPage />} />
               <Route path={"/session/:id"} element={<SessionPage />}/>
+              <Route path={"/cart/:id"} element={<CartPage />}/>
               <Route element={<AdminRoute />}>
                   <Route element={<AdminLayout />}>
                       <Route path="/admin/dashboard" element={<AdminDashboardPage />} />

@@ -50,12 +50,15 @@ const SessionPage = () => {
         if (!isAuthenticated) return navigate('/login');
 
         try {
-            await createReservation({
+            const novaReserva = await createReservation({
                 showTimeId: Number(id),
                 seatIds: selectedSeatIds
             });
-            alert("Reservation made successfully!");
-            navigate('/sessions');
+
+            alert("Adicionado ao carrinho com sucesso!");
+
+            navigate(`/cart/${novaReserva.id}`);
+
         } catch (error) {
             alert("Error making reservation.");
             const updatedSeats = await getSeatsForShowTime(Number(id));
@@ -141,7 +144,7 @@ const SessionPage = () => {
                             disabled={selectedSeatIds.length === 0}
                             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
                         >
-                            Reservar
+                            Go to checkout
                         </button>
                     ) : (
                         <Link to="/login" className="block w-full bg-gray-800 text-white py-2 rounded text-center">

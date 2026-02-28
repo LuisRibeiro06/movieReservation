@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,6 +38,11 @@ public class ReservationService {
 
     public List<Reservation> getAllReservations(){
         return reservationRepository.findAll();
+    }
+
+    public Reservation getReservationById(Long reservationId){
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
     }
 
     public AdminDashboardDTO getAdminDashboardData() {
@@ -86,8 +92,9 @@ public class ReservationService {
         reservation.setUser(user);
         reservation.setSeats(seats);
         reservation.setTotalPrice(totalPrice);
-        reservation.setStatus(ReservationStatus.CONFIRMED);
-
+        reservation.setStatus(ReservationStatus.PENDING);
+        reservation.setReservationDate(LocalDateTime.now());
+        reservation.setExpiresAt(LocalDateTime.now().plusMinutes(10));
 
         return reservationRepository.save(reservation);
     }
@@ -108,6 +115,30 @@ public class ReservationService {
 
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+    }
+
+    @Transactional
+    public Reservation confirmPayment(Long reservationId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
+
+        if (!reservation.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Não autorizado");
+        }
+
+        if (reservation.getExpiresAt().isBefore(LocalDateTime.now()) || reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new RuntimeException("O tempo expirou. Os lugares foram libertados.");
+        }
+
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            throw new RuntimeException("Esta reserva já foi paga.");
+        }
+
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+
+        return reservationRepository.save(reservation);
     }
 
     public List<Seat> getOccupiedSeatsByShowTime(Long showTimeId){

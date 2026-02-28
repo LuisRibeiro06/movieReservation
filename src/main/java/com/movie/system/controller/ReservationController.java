@@ -28,6 +28,12 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAdminDashboardData());
     }
 
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<Reservation> getReservationById(@PathVariable Long reservationId) {
+        System.out.println("Reservation ID: " + reservationId);
+        return ResponseEntity.ok(reservationService.getReservationById(reservationId));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Reservation>> getAllUserReservations(@PathVariable Long userId) {
         return ResponseEntity.ok(reservationService.getAllUserReservations(userId));
@@ -50,5 +56,11 @@ public class ReservationController {
     public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId) {
         reservationService.cancelReservation(reservationId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{reservationId}/checkout")
+    public ResponseEntity<Reservation> checkout(@PathVariable Long reservationId) {
+        Reservation confirmedReservation = reservationService.confirmPayment(reservationId);
+        return ResponseEntity.ok(confirmedReservation);
     }
 }
