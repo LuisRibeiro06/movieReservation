@@ -5,6 +5,7 @@ import com.movie.system.dto.ReservationRequestDTO;
 import com.movie.system.model.Reservation;
 import com.movie.system.model.Seat;
 import com.movie.system.service.ReservationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -39,7 +40,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllUserReservations(userId));
     }
 
-    @GetMapping("/occupied/{id}")
+    @GetMapping("/occupied/{showTimeId}")
     public ResponseEntity<List<Long>> getOccupiedSeats(@PathVariable Long showTimeId) {
         List<Seat> occupiedSeats = reservationService.getOccupiedSeatsByShowTime(showTimeId);
         List<Long> occupiedIds = occupiedSeats.stream().map(Seat::getId).toList();
@@ -47,7 +48,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Reservation> createReservation(@RequestBody ReservationRequestDTO request) {
+    public ResponseEntity<Reservation> createReservation(@Valid @RequestBody ReservationRequestDTO request) {
         Reservation reservation = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservation);
     }

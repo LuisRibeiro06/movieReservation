@@ -12,25 +12,46 @@ interface SessionModalProps {
 export default function SessionModal({ session, movies, cinemaRooms, onClose, onSave }: SessionModalProps) {
     const [formData, setFormData] = useState<Omit<Session, 'id'>>({
         movieId: 0,
+        movieTitle: '',
         cinemaRoomId: 0,
+        roomName: '',
         date: '',
         price: 0,
     });
 
     useEffect(() => {
         if (session) {
+            const selectedMovie = movies.find(m => m.id === session.movieId);
+            const selectedRoom = cinemaRooms.find(r => r.id === session.cinemaRoomId);
+            
             setFormData({
                 movieId: session.movieId || 0,
+                movieTitle: selectedMovie?.title || session.movieTitle || '',
                 cinemaRoomId: session.cinemaRoomId || 0,
+                roomName: selectedRoom?.name || session.roomName || '',
                 date: session.date ? new Date(session.date).toISOString().slice(0, 16) : '',
                 price: session.price || 0,
             });
         }
-    }, [session]);
+    }, [session, movies, cinemaRooms]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const numValue = name === 'movieId' || name === 'cinemaRoomId' || name === 'price' ? Number(value) : value;
+        
+        setFormData(prev => {
+            const updated = { ...prev, [name]: numValue };
+            
+            if (name === 'movieId') {
+                const selectedMovie = movies.find(m => m.id === Number(value));
+                updated.movieTitle = selectedMovie?.title || '';
+            } else if (name === 'cinemaRoomId') {
+                const selectedRoom = cinemaRooms.find(r => r.id === Number(value));
+                updated.roomName = selectedRoom?.name || '';
+            }
+            
+            return updated;
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {

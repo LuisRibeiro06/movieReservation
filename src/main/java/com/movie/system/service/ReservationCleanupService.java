@@ -24,10 +24,7 @@ public class ReservationCleanupService {
     public void releaseExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Reservation> expiredReservations = reservationRepository.findAll().stream()
-                .filter(r -> r.getStatus() == ReservationStatus.PENDING)
-                .filter(r -> r.getExpiresAt() != null && r.getExpiresAt().isBefore(now))
-                .toList();
+        List<Reservation> expiredReservations = reservationRepository.findExpiredPendingReservations(LocalDateTime.now());
 
         for (Reservation r : expiredReservations) {
             r.setStatus(ReservationStatus.CANCELLED);

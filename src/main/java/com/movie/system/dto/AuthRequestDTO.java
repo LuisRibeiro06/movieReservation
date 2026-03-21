@@ -1,7 +1,11 @@
 package com.movie.system.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class AuthRequestDTO {
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
 
     public String getUsername() {

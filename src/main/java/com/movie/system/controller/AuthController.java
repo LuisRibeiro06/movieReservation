@@ -7,11 +7,16 @@ import com.movie.system.model.Role;
 import com.movie.system.model.User;
 import com.movie.system.repository.RoleRepository;
 import com.movie.system.repository.UserRepository;
+import com.movie.system.service.LoginRateLimiterService;
 import com.movie.system.service.TokenService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,28 +32,41 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
+    private final LoginRateLimiterService loginRateLimiterService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, TokenService tokenService, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, TokenService tokenService, PasswordEncoder passwordEncoder, LoginRateLimiterService loginRateLimiterService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
+        this.loginRateLimiterService = loginRateLimiterService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO authRequestDTO){
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword());
-        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request){
+        String ipAddress = request.getRemoteAddr();
+        if (loginRateLimiterService.isBlocked(ipAddress)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new AuthResponseDTO("Too many failed attempts. Try again in 15 minutes."));
+        }
 
-        String token = tokenService.generateToken((User) auth.getPrincipal());
+        try {
+            UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(authRequestDTO.getUsername(), authRequestDTO.getPassword());
+            Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
-        return ResponseEntity.ok(new AuthResponseDTO(token));
+            String token = tokenService.generateToken((User) auth.getPrincipal());
+            loginRateLimiterService.resetAttempts(ipAddress);
+
+            return ResponseEntity.ok(new AuthResponseDTO(token));
+        } catch (AuthenticationException e) {
+            loginRateLimiterService.recordFailedAttempt(ipAddress);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponseDTO("Invalid username or password"));
+        }
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterDTO registerDTO){
-        if (userRepository.findByUsername(registerDTO.getUsername()) != null){
+    public ResponseEntity register(@Valid @RequestBody RegisterDTO registerDTO){
+        if (userRepository.findByUsername(registerDTO.getUsername()).isPresent()){
             return ResponseEntity.badRequest().body("Username is already taken");
         }
         String encryptedPassword = this.passwordEncoder.encode(registerDTO.getPassword());

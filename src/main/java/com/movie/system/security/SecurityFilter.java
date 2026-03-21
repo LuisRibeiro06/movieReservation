@@ -1,5 +1,6 @@
 package com.movie.system.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.movie.system.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

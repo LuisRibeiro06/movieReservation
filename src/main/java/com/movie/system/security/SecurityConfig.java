@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/seats/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/showtimes/**").permitAll()
                         .requestMatchers("/api/reservations/admin/dashboard").hasRole("ADMIN")
-                        .requestMatchers("/api/reservations/**").hasRole("USER")
+                        .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

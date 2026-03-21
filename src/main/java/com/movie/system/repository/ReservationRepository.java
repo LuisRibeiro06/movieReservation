@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -23,6 +24,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.showTime.id = :showTimeId " +
             "AND r.status <> 'CANCELLED'")
     List<Seat> findOccupiedSeatsByShowTime(@Param("showTimeId") Long showTimeId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = 'PENDING' AND r.expiresAt < :now")
+    List<Reservation> findExpiredPendingReservations(@Param("now") LocalDateTime now);
 
     List<Reservation> findByUser_Id(Long userId);
 }
