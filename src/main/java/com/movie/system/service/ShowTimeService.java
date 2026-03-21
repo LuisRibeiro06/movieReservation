@@ -30,7 +30,7 @@ public class ShowTimeService {
     }
 
     public List<ShowTimeDTO> getAllShowTimes(){
-        return showTimeRepository.findAll().stream()
+        return showTimeRepository.getUpcomingShowTimes().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
