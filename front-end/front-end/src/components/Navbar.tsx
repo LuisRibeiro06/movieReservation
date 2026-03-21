@@ -1,28 +1,81 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useState, useEffect } from 'react';
 
 const Navbar = () => {
     const { isAuthenticated, logout, user } = useAuth();
+    const location = useLocation();
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', onScroll);
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    const isActive = (path: string) => location.pathname === path;
+
     return (
-        <nav className="bg-gray-800 p-4">
-            <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center">
-                    <Link to="/" className="text-white text-lg">Movie Reservation</Link>
-                    <div className="ml-10">
-                        <Link to="/" className="text-gray-300 hover:text-white mr-4">Movies</Link>
-                        <Link to="/sessions" className="text-gray-300 hover:text-white">Sessions</Link>
+        <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+            scrolled
+                ? 'bg-[#08080e]/90 border-b border-[rgba(232,160,32,0.15)]'
+                : 'bg-[#08080e]/60 border-b border-white/5'
+        } backdrop-blur-xl`}>
+            <div className="max-w-7xl mx-auto px-8 h-16 flex items-center justify-between">
+
+                {/* Logo */}
+                <Link to="/" className="flex items-center gap-2.5 no-underline">
+                    <div className="w-8 h-8 bg-[var(--color-accent)] rounded-lg flex items-center justify-center text-base">
+                        🎬
                     </div>
+                    <span className="font-[var(--font-display)] text-[1.4rem] tracking-widest text-[var(--color-t1)]">
+                        CINEMAX
+                    </span>
+                </Link>
+
+                {/* Nav links */}
+                <div className="flex items-center gap-8">
+                    {[{ to: '/', label: 'Films' }, { to: '/sessions', label: 'Sessions' }].map(({ to, label }) => (
+                        <Link
+                            key={to}
+                            to={to}
+                            className={`text-[0.82rem] font-medium tracking-[0.06em] uppercase no-underline pb-0.5 transition-colors duration-200 ${
+                                isActive(to)
+                                    ? 'text-[var(--color-accent)] border-b border-[var(--color-accent)]'
+                                    : 'text-[var(--color-t2)] border-b border-transparent hover:text-[var(--color-t1)]'
+                            }`}
+                        >
+                            {label}
+                        </Link>
+                    ))}
                 </div>
-                <div>
+
+                {/* Auth */}
+                <div className="flex items-center gap-3">
                     {isAuthenticated ? (
                         <>
-                            <span className="text-white mr-4">Welcome, {user?.email}</span>
-                            <button onClick={logout} className="text-gray-300 hover:text-white">Logout</button>
+                            <span className="text-[0.8rem] text-[var(--color-t2)]">{user?.email}</span>
+                            <button
+                                onClick={logout}
+                                className="text-[0.8rem] font-medium px-4 py-1.5 rounded-lg border border-white/10 text-[var(--color-t2)] hover:text-[var(--color-t1)] hover:border-[rgba(232,160,32,0.3)] hover:bg-[rgba(232,160,32,0.06)] transition-all duration-200 cursor-pointer bg-transparent"
+                            >
+                                Sign out
+                            </button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="text-gray-300 hover:text-white mr-4">Login</Link>
-                            <Link to="/register" className="text-gray-300 hover:text-white">Register</Link>
+                            <Link
+                                to="/login"
+                                className="text-[0.8rem] font-medium px-4 py-1.5 rounded-lg border border-white/10 text-[var(--color-t2)] hover:text-[var(--color-t1)] hover:border-[rgba(232,160,32,0.3)] hover:bg-[rgba(232,160,32,0.06)] transition-all duration-200 no-underline"
+                            >
+                                Sign in
+                            </Link>
+                            <Link
+                                to="/register"
+                                className="text-[0.8rem] font-semibold px-4 py-1.5 rounded-lg bg-[var(--color-accent)] text-[#0a0810] hover:bg-[#f0b030] hover:shadow-[0_0_20px_rgba(232,160,32,0.4)] transition-all duration-200 no-underline"
+                            >
+                                Register
+                            </Link>
                         </>
                     )}
                 </div>

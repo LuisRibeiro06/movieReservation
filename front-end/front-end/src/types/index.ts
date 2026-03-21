@@ -43,14 +43,17 @@ export interface SeatAvailability {
     id: number;
     seatRow: string;
     seatNumber: number;
+    isAvailable: boolean;
 }
 
 export interface Reservation {
     id: number;
+    status: string;
+    totalPrice: number;
     user: { id: number; username: string; };
     showTime: Session;
     seats: SeatAvailability[];
-    reservationTime: string;
+    reservationDate: string;
 }
 
 export interface ReservationRequest {

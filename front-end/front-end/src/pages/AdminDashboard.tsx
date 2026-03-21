@@ -1,24 +1,28 @@
 import { useEffect, useState } from 'react';
 import { getAdminDashboard } from '../services/reservationService';
 import type { AdminDashboard, Reservation } from '../types';
+import ErrorState from "../components/ErrorState.tsx";
 
 export default function AdminDashboardPage() {
     const [dashboardData, setDashboardData] = useState<AdminDashboard | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        setError(null); // ← limpar erro anterior antes de retry
+        try {
+            const data = await getAdminDashboard();
+            setDashboardData(data);
+        } catch (err) {
+            setError('Failed to fetch dashboard data.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                const data = await getAdminDashboard();
-                setDashboardData(data);
-            } catch (err) {
-                setError('Failed to fetch dashboard data.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchDashboardData();
     }, []);
 
@@ -27,7 +31,7 @@ export default function AdminDashboardPage() {
     }
 
     if (error) {
-        return <div>{error}</div>;
+        return ErrorState({ message: error, onRetry: fetchDashboardData });
     }
 
     if (!dashboardData) {

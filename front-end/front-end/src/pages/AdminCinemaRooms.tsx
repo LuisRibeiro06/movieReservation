@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAllCinemaRooms, createCinemaRoom, deleteCinemaRoom } from '../services/cinemaRoomService';
 import type { CinemaRoom } from '../types';
+import ErrorState from "../components/ErrorState.tsx";
 
 export default function AdminCinemaRooms() {
     const [cinemaRooms, setCinemaRooms] = useState<CinemaRoom[]>([]);
@@ -9,20 +10,23 @@ export default function AdminCinemaRooms() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const fetchCinemaRooms = async () => {
+        setLoading(true);
+        setError(null); // ← limpar erro anterior antes de retry
+        try {
+            const data = await getAllCinemaRooms();
+            setCinemaRooms(data);
+        } catch (err) {
+            setError('Failed to fetch cinema rooms.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchCinemaRooms = async () => {
-            try {
-                const data = await getAllCinemaRooms();
-                setCinemaRooms(data);
-            } catch (err) {
-                setError('Failed to fetch cinema rooms.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchCinemaRooms();
     }, []);
+
 
     const handleCreate = async () => {
         if (!newRoomName || newRoomCapacity <= 0) {
@@ -56,8 +60,8 @@ export default function AdminCinemaRooms() {
         return <div>Loading...</div>;
     }
 
-    if (error) {
-        return <div>{error}</div>;
+    if (error){
+        return <ErrorState message={error} onRetry={fetchCinemaRooms} />;
     }
 
     return (

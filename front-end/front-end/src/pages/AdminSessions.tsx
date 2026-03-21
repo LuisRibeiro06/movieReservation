@@ -4,6 +4,7 @@ import { getMovies } from '../services/movieService';
 import { getAllCinemaRooms } from '../services/cinemaRoomService';
 import type { Session, Movie, CinemaRoom } from '../types';
 import SessionModal from '../components/SessionModal';
+import ErrorState from "../components/ErrorState.tsx";
 
 export default function AdminSessions() {
     const [sessions, setSessions] = useState<Session[]>([]);
@@ -14,24 +15,27 @@ export default function AdminSessions() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSession, setSelectedSession] = useState<Partial<Session> | null>(null);
 
+    const fetchData = async () => {
+        setLoading(true);
+        setError(null); // ← limpar erro anterior antes de retry
+        try {
+            const [sessionsData, moviesData, cinemaRoomsData] = await Promise.all([
+                getSessions(),
+                getMovies(),
+                getAllCinemaRooms(),
+            ]);
+            setSessions(sessionsData);
+            setMovies(moviesData);
+            setCinemaRooms(cinemaRoomsData);
+        } catch (err) {
+            setError('Failed to fetch data.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [sessionsData, moviesData, cinemaRoomsData] = await Promise.all([
-                    getSessions(),
-                    getMovies(),
-                    getAllCinemaRooms(),
-                ]);
-                setSessions(sessionsData);
-                setMovies(moviesData);
-                setCinemaRooms(cinemaRoomsData);
-            } catch (err) {
-                setError('Failed to fetch data.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchData();
     }, []);
 
@@ -78,7 +82,7 @@ export default function AdminSessions() {
     }
 
     if (error) {
-        return <div>{error}</div>;
+        return ErrorState({ message: error, onRetry: fetchData });
     }
 
     const getMovieTitle = (movieId: number) => movies.find(movie => movie.id === movieId)?.title || 'Unknown Movie';

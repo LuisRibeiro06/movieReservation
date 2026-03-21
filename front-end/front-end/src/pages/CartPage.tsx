@@ -1,4 +1,3 @@
-// src/pages/CartPage.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getReservationById, checkoutReservation } from '../services/reservationService';
@@ -6,149 +5,132 @@ import { getReservationById, checkoutReservation } from '../services/reservation
 const CartPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-
     const [reservation, setReservation] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-
-    const [timeLeft, setTimeLeft] = useState<number>(0);
+    const [timeLeft, setTimeLeft] = useState(0);
+    const [totalSeconds, setTotalSeconds] = useState(1);
 
     useEffect(() => {
-        const loadCart = async () => {
-            if (!id) return;
-            try {
-                const data = await getReservationById(Number(id));
+        if (!id) return;
+        getReservationById(Number(id))
+            .then(data => {
                 setReservation(data);
-
                 if (data.expiresAt) {
-                    const expiryTime = new Date(data.expiresAt).getTime();
-                    const currentTime = new Date().getTime();
-                    const diffInSeconds = Math.floor((expiryTime - currentTime) / 1000);
-                    setTimeLeft(diffInSeconds > 0 ? diffInSeconds : 0);
+                    const diff = Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000);
+                    const total = Math.floor((new Date(data.expiresAt).getTime() - new Date(data.reservationTime).getTime()) / 1000);
+                    setTimeLeft(diff > 0 ? diff : 0);
+                    setTotalSeconds(total > 0 ? total : 1);
                 }
-            } catch (error) {
-                alert("Erro ao carregar o carrinho ou reserva expirada.");
-                navigate('/sessions');
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadCart();
+            })
+            .catch(() => navigate('/sessions'))
+            .finally(() => setLoading(false));
     }, [id, navigate]);
 
-    // Lógica do Cronómetro (atualiza a cada segundo)
     useEffect(() => {
         if (timeLeft <= 0) return;
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(timer);
+        const t = setInterval(() => setTimeLeft(p => p <= 1 ? (clearInterval(t), 0) : p - 1), 1000);
+        return () => clearInterval(t);
     }, [timeLeft]);
 
-    const formatTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
-    };
+    const fmt = (s: number) =>
+        `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
-    const handlePayment = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (timeLeft <= 0) {
-            alert("O tempo para pagamento expirou. Os lugares foram libertados.");
-            navigate('/sessions');
-            return;
-        }
-
+    const handlePayment = async () => {
+        if (timeLeft <= 0) { navigate('/sessions'); return; }
         setIsProcessing(true);
-        try {
-            await checkoutReservation(Number(id));
-            alert("Payment successful!");
-        } catch (error) {
-            alert("Error processing payment.");
-        }
-        finally {
-            setIsProcessing(false);
-            navigate('/sessions');
-        }
+        try { await checkoutReservation(Number(id)); }
+        catch {/* handle */}
+        finally { setIsProcessing(false); navigate('/sessions'); }
     };
 
-    if (loading) return <div className="p-10 text-center">A carregar carrinho...</div>;
-    if (!reservation) return <div>Carrinho vazio ou não encontrado.</div>;
+    if (loading) return (
+        <div className="min-h-[60vh] flex items-center justify-center text-[var(--color-t3)]">Loading cart…</div>
+    );
+    if (!reservation) return null;
 
     const isExpired = timeLeft <= 0 || reservation.status === 'CANCELLED';
+    const pct = Math.max(0, Math.min(100, (timeLeft / totalSeconds) * 100));
+    const barColor = pct > 40 ? 'var(--color-accent)' : '#f87171';
 
     return (
-        <div className="container mx-auto p-6 max-w-3xl">
-            <h1 className="text-3xl font-bold mb-6">Finish Order</h1>
+        <div className="max-w-2xl mx-auto px-8 pt-12 pb-20">
+            {/* Header */}
+            <div className="fade-up mb-10">
+                <p className="text-[0.78rem] tracking-[0.2em] uppercase text-[var(--color-accent)] mb-2">Checkout</p>
+                <h1 className="font-[var(--font-display)] text-[clamp(2rem,5vw,3.5rem)] tracking-wide leading-none">
+                    Complete order
+                </h1>
+            </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-lg shadow border">
-                    <h2 className="text-xl font-bold mb-4">Order Details</h2>
+            <div className="grid grid-cols-[1fr_auto] gap-5 items-start flex-wrap">
+                {/* Order summary */}
+                <div className="fade-up-1 bg-[var(--color-card)] border border-white/7 rounded-[18px] p-7">
+                    <h2 className="text-[0.72rem] font-semibold tracking-[0.15em] uppercase text-[var(--color-t3)] mb-5">
+                        Order details
+                    </h2>
 
-                    <div className="space-y-4 mb-6">
-                        <div>
-                            <p className="text-sm text-gray-500">Film</p>
-                            <p className="font-bold">{reservation.showTime?.movie?.title || "Filme Selecionado"}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Session</p>
-                            <p className="font-medium">
-                                {new Date(reservation.showTime?.showDate || reservation.reservationTime).toLocaleString()}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Selected places</p>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {reservation.seats?.map((seat: any) => (
-                                    <span key={seat.id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
-                                        {seat.seatRow}{seat.seatNumber}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
+                    <p className="font-[var(--font-display)] text-[1.8rem] tracking-wide leading-none mb-1">
+                        {reservation.showTime?.movie?.title || 'Film'}
+                    </p>
+                    <p className="text-[0.84rem] text-[var(--color-t2)] mb-6">
+                        {new Date(reservation.showTime?.showDate || reservation.reservationTime)
+                            .toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+
+                    <p className="text-[0.7rem] font-semibold tracking-[0.1em] uppercase text-[var(--color-t3)] mb-2">
+                        Selected seats
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                        {reservation.seats?.map((seat: any) => (
+                            <span key={seat.id} className="px-2.5 py-1 rounded-full text-[0.68rem] font-semibold tracking-wide uppercase bg-[rgba(232,160,32,0.12)] text-[var(--color-accent)] border border-[rgba(232,160,32,0.3)]">
+                                {seat.seatRow}{seat.seatNumber}
+                            </span>
+                        ))}
                     </div>
 
-                    <div className="border-t pt-4 flex justify-between items-center">
-                        <span className="text-lg">Total a Pagar:</span>
-                        <span className="text-2xl font-bold text-blue-600">{reservation.totalPrice} €</span>
+                    <hr className="border-none border-t border-white/10 mb-5" />
+
+                    <div className="flex justify-between items-baseline">
+                        <span className="text-[0.84rem] text-[var(--color-t2)]">Total</span>
+                        <span className="font-[var(--font-display)] text-[2rem] tracking-wide text-[var(--color-accent)]">
+                            €{reservation.totalPrice}
+                        </span>
                     </div>
                 </div>
 
-                <div>
-                    <div className={`p-4 mb-6 rounded-lg text-center font-bold text-xl border-2 ${isExpired ? 'bg-red-50 text-red-600 border-red-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+                {/* Timer + pay */}
+                <div className="fade-up-2 w-48 flex flex-col gap-4">
+                    <div className={`bg-[var(--color-card)] border rounded-xl p-5 text-center ${isExpired ? 'border-red-500/20' : 'border-[rgba(232,160,32,0.2)]'}`}>
                         {isExpired ? (
-                            <span>Reservation expired</span>
+                            <p className="text-[0.78rem] font-semibold text-red-400 m-0">Reservation expired</p>
                         ) : (
-                            <div className="flex flex-col items-center">
-                                <span className="text-sm uppercase tracking-wide text-yellow-600 mb-1">Time left to pay:</span>
-                                <span className="text-3xl font-mono">{formatTime(timeLeft)}</span>
-                            </div>
+                            <>
+                                <p className="text-[0.62rem] tracking-[0.15em] uppercase text-[var(--color-t3)] mb-1">Time remaining</p>
+                                <p className="font-[var(--font-display)] text-[2.2rem] tracking-widest text-[var(--color-accent)] leading-none mb-3">
+                                    {fmt(timeLeft)}
+                                </p>
+                                {/* Progress bar */}
+                                <div className="h-[3px] bg-white/10 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+                                        style={{ width: `${pct}%`, background: barColor, transition: 'width 1s linear, background 0.5s' }}
+                                    />
+                                </div>
+                            </>
                         )}
                     </div>
-                        <button onClick={handlePayment}
-                            type="submit"
-                            disabled={isExpired || isProcessing}
-                            className={`w-full mt-6 py-3 rounded-lg font-bold text-white transition-all
-                                ${isExpired
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : isProcessing
-                                    ? 'bg-blue-400 cursor-wait'
-                                    : 'bg-green-600 hover:bg-green-700 shadow-lg'
-                            }`}
-                        >
-                            {isProcessing ? 'Processing...' : 'Pay and Checkout'}
-                        </button>
-                </div>
+
+                    <button
+                        onClick={handlePayment}
+                        disabled={isExpired || isProcessing}
+                        className="w-full py-3.5 rounded-lg font-semibold text-[0.9rem] transition-all duration-200 border-none cursor-pointer bg-[var(--color-accent)] text-[#0a0810] hover:bg-[#f0b030] hover:shadow-[0_0_24px_rgba(232,160,32,0.4)] disabled:bg-[var(--color-t3)] disabled:text-[var(--color-t2)] disabled:shadow-none disabled:cursor-not-allowed"
+                    >
+                        {isProcessing ? 'Processing…' : isExpired ? 'Expired' : 'Pay now'}
+                    </button>
                 </div>
             </div>
+        </div>
     );
 };
 
