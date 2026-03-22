@@ -1,5 +1,8 @@
 package com.movie.system.service;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class LoginRateLimiterService {
     private final int MAX_ATTEMPTS = 5;
     private final long BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
