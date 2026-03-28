@@ -52,6 +52,15 @@ const Navbar = () => {
 
                 {/* Auth */}
                 <div className="flex items-center gap-3">
+                    {(user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') && (
+                        <Link
+                            to="/admin/movies"
+                            className="mr-4 text-[0.7rem] font-bold tracking-[0.08em] uppercase px-2 py-0.5 rounded bg-[var(--color-accent)] text-[#0a0810] hover:opacity-80 transition-opacity"
+                        >
+                            Admin
+                        </Link>
+                    )}
+                </div>
                     {isAuthenticated ? (
                         <>
                             <span className="text-[0.8rem] text-[var(--color-t2)]">{user?.email}</span>
@@ -79,7 +88,6 @@ const Navbar = () => {
                         </>
                     )}
                 </div>
-            </div>
         </nav>
     );
 };
