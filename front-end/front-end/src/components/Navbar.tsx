@@ -29,8 +29,8 @@ const Navbar = () => {
                         🎬
                     </div>
                     <span className="font-[var(--font-display)] text-[1.4rem] tracking-widest text-[var(--color-t1)]">
-                        CINEMAX
-                    </span>
+                    CINEMAX
+                </span>
                 </Link>
 
                 {/* Nav links */}
@@ -50,20 +50,20 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                {/* Auth */}
+                {/* Auth & Admin Group - TUDO DENTRO DESTA DIV */}
                 <div className="flex items-center gap-3">
                     {(user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN') && (
                         <Link
                             to="/admin/movies"
-                            className="mr-4 text-[0.7rem] font-bold tracking-[0.08em] uppercase px-2 py-0.5 rounded bg-[var(--color-accent)] text-[#0a0810] hover:opacity-80 transition-opacity"
+                            className="mr-2 text-[0.7rem] font-bold tracking-[0.08em] uppercase px-2 py-0.5 rounded bg-[var(--color-accent)] text-[#0a0810] hover:opacity-80 transition-opacity"
                         >
                             Admin
                         </Link>
                     )}
-                </div>
+
                     {isAuthenticated ? (
                         <>
-                            <span className="text-[0.8rem] text-[var(--color-t2)]">{user?.email}</span>
+                            <span className="text-[0.8rem] text-[var(--color-t2)] mr-2">{user?.email}</span>
                             <button
                                 onClick={logout}
                                 className="text-[0.8rem] font-medium px-4 py-1.5 rounded-lg border border-white/10 text-[var(--color-t2)] hover:text-[var(--color-t1)] hover:border-[rgba(232,160,32,0.3)] hover:bg-[rgba(232,160,32,0.06)] transition-all duration-200 cursor-pointer bg-transparent"
@@ -88,6 +88,7 @@ const Navbar = () => {
                         </>
                     )}
                 </div>
+            </div>
         </nav>
     );
 };
