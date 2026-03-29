@@ -15,6 +15,9 @@ const Navbar = () => {
 
     const isActive = (path: string) => location.pathname === path;
 
+    console.log("Estado atual do User:", user);
+
+
     return (
         <nav className={`sticky top-0 z-50 transition-all duration-300 ${
             scrolled
