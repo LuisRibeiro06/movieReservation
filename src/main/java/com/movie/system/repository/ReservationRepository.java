@@ -19,6 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByShowTimeAndSeats(@Param("showTimeId") Long showTimeId, @Param("seatIds") List<Long> seatIds
     );
 
+
     @Query("SELECT s FROM Reservation r " +
             "JOIN r.seats s " +
             "WHERE r.showTime.id = :showTimeId " +

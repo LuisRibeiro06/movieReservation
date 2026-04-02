@@ -15,9 +15,6 @@ const Navbar = () => {
 
     const isActive = (path: string) => location.pathname === path;
 
-    console.log("Estado atual do User:", user);
-
-
     return (
         <nav className={`sticky top-0 z-50 transition-all duration-300 ${
             scrolled
@@ -67,6 +64,9 @@ const Navbar = () => {
                     {isAuthenticated ? (
                         <>
                             <span className="text-[0.8rem] text-[var(--color-t2)] mr-2">{user?.email}</span>
+                            <Link to="/profile" className="text-[0.8rem] font-medium px-4 py-1.5 rounded-lg border border-white/10 text-[var(--color-t2)] hover:text-[var(--color-t1)] hover:border-[rgba(232,160,32,0.3)] hover:bg-[rgba(232,160,32,0.06)] transition-all duration-200 no-underline">
+                                Profile
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="text-[0.8rem] font-medium px-4 py-1.5 rounded-lg border border-white/10 text-[var(--color-t2)] hover:text-[var(--color-t1)] hover:border-[rgba(232,160,32,0.3)] hover:bg-[rgba(232,160,32,0.06)] transition-all duration-200 cursor-pointer bg-transparent"

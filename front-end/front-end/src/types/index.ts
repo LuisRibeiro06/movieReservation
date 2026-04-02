@@ -56,6 +56,13 @@ export interface Reservation {
     reservationDate: string;
 }
 
+export interface User {
+    id: number;
+    username: string;
+    email: string;
+    reservations: Reservation[];
+}
+
 export interface ReservationRequest {
     showTimeId: number;
     seatIds: number[];

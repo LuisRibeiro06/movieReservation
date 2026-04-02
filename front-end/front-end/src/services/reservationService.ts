@@ -1,5 +1,5 @@
 import api from './api';
-import type { AdminDashboard, ReservationRequest } from '../types';
+import type { AdminDashboard, Reservation, ReservationRequest } from '../types';
 
 export const createReservation = async (reservationRequest: ReservationRequest) => {
     const response = await api.post('/reservations', reservationRequest);
@@ -17,6 +17,11 @@ export const cancelReservation = async (reservationId: number) => {
 
 export const getReservationById = async (reservationId: number) => {
     const response = await api.get(`/reservations/${reservationId}`);
+    return response.data;
+}
+
+export const getReservationsByUser = async (): Promise<Reservation[]> => {
+    const response = await api.get('/reservations/user');
     return response.data;
 }
 

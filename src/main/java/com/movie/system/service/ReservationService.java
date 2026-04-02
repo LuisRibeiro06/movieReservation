@@ -32,8 +32,12 @@ public class ReservationService {
     }
 
 
-    public List<Reservation> getAllUserReservations(Long userId){
-        return reservationRepository.findByUser_Id(userId);
+    public List<Reservation> getAllUserReservations(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return reservationRepository.findByUser_Id(user.getId());
     }
 
     public List<Reservation> getAllReservations(){
