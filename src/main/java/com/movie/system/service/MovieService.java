@@ -1,7 +1,9 @@
 package com.movie.system.service;
 
+import com.movie.system.client.ImdbClient;
 import com.movie.system.client.MovieClient;
 import com.movie.system.dto.UpdateMovieDTO;
+import com.movie.system.dto.movieAPI.ImdbVideoApiResponse;
 import com.movie.system.dto.movieAPI.OmdbMovieDetail;
 import com.movie.system.dto.movieAPI.OmdbSearchResponse;
 import com.movie.system.dto.movieAPI.OmdbSearchResult;
@@ -23,14 +25,16 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ShowTimeRepository showTimeRepository;
     private final MovieClient movieClient;
+    private final ImdbClient imdbClient;
 
     @Value("${omdb.api.key}")
     private String apiKey;
 
-    public MovieService(MovieRepository movieRepository, ShowTimeRepository showTimeRepository, MovieClient movieClient) {
+    public MovieService(MovieRepository movieRepository, ShowTimeRepository showTimeRepository, MovieClient movieClient, ImdbClient imdbClient) {
         this.movieRepository = movieRepository;
         this.showTimeRepository = showTimeRepository;
         this.movieClient = movieClient;
+        this.imdbClient = imdbClient;
     }
 
     public List<Movie> getAllMovies(){
@@ -63,6 +67,15 @@ public class MovieService {
             throw new RuntimeException("Movie not found");
         }
 
+        ImdbVideoApiResponse imdbVideoApiResponse = imdbClient.getMovieVideos(imdbId);
+
+        String trailerUrl = imdbVideoApiResponse.videos().stream()
+                .filter(video -> "trailer".equals(video.type()))
+                .findFirst()
+                .map(ImdbVideoApiResponse.ImdbVideo::id)
+                .orElse(null);
+
+
         Movie movie = new Movie();
         movie.setTitle(omdbMovieDetail.getTitle());
         movie.setImdbId(omdbMovieDetail.getImdbID());
@@ -70,6 +83,7 @@ public class MovieService {
         movie.setDuration(parseRuntime(omdbMovieDetail.getRuntime()));
         movie.setDescription(omdbMovieDetail.getPlot());
         movie.setPosterImage(omdbMovieDetail.getPoster());
+        movie.setTrailerUrl(trailerUrl);
 
         String plot = "N/A".equals(omdbMovieDetail.getPlot()) ? "No plot available." : omdbMovieDetail.getPlot();
         if (plot.length() > 4000) {
@@ -107,6 +121,11 @@ public class MovieService {
         if (!movieRepository.existsById(movieId)) {
             throw new RuntimeException("Movie not found");
         }
+
+        List<ShowTime> showTimes = showTimeRepository.findByMovie_Id(movieId);
+
+        showTimeRepository.deleteAll(showTimes);
+
         movieRepository.deleteById(movieId);
     }
 
@@ -132,6 +151,4 @@ public class MovieService {
 
         return movies;
     }
-
-
 }

@@ -21,6 +21,7 @@ export interface Movie {
     description: string;
     posterImage: string;
     imdbId: string;
+    trailerUrl: string;
 }
 
 export interface CinemaRoom {

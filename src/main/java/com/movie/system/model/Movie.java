@@ -37,4 +37,7 @@ public class Movie {
     @Column(name = "imdb_id", nullable = false)
     private String imdbId;
 
+    @Column(name = "trailer_url")
+    private String trailerUrl;
+
 }

@@ -66,6 +66,27 @@ const MoviePage = () => {
                     </div>
                 </div>
 
+                {movie.trailerUrl && (
+                    <div className="fade-up-2 mt-14">
+                        <div className="flex items-center gap-4 mb-6">
+                            <h2 className="font-[var(--font-display)] text-[1.6rem] tracking-widest m-0 shrink-0">TRAILER</h2>
+                            <hr className="flex-1 border-none border-t border-white/10" />
+                        </div>
+
+                        <div className="max-w-3xl">
+                            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <iframe
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                                    src={`https://www.imdb.com/video/embed/${movie.trailerUrl}`}
+                                    title={`${movie.title} Trailer`}
+                                    frameBorder="0"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Sessions */}
                 <div className="fade-up-2 mt-14">
                     <div className="flex items-center gap-4 mb-6">

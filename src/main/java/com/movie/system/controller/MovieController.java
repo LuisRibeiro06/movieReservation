@@ -26,13 +26,13 @@ public class MovieController {
 
     @GetMapping
     public ResponseEntity<List<ReturnMovieDTO>> getAllMovies() {
-        return ResponseEntity.ok(movieService.getAllMovies().stream().map(movie -> new ReturnMovieDTO(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getDuration(), movie.getDescription(), movie.getPosterImage(), movie.getImdbId())).collect(Collectors.toList()));
+        return ResponseEntity.ok(movieService.getAllMovies().stream().map(movie -> new ReturnMovieDTO(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getDuration(), movie.getDescription(), movie.getPosterImage(), movie.getImdbId(), movie.getTrailerUrl())).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ReturnMovieDTO> getMovieById(@PathVariable Long id){
         Movie movie = movieService.getMovieById(id);
-        return ResponseEntity.ok(new ReturnMovieDTO(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getDuration(), movie.getDescription(), movie.getPosterImage(), movie.getImdbId()));
+        return ResponseEntity.ok(new ReturnMovieDTO(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getDuration(), movie.getDescription(), movie.getPosterImage(), movie.getImdbId(), movie.getTrailerUrl()));
     }
 
     @GetMapping("/playing")
@@ -48,13 +48,13 @@ public class MovieController {
     @PostMapping("/import")
     public ResponseEntity<ReturnMovieDTO> importMovie(@RequestParam String imdbId) {
         Movie savedMovie = movieService.saveMovie(imdbId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ReturnMovieDTO(savedMovie.getId(), savedMovie.getTitle(), savedMovie.getGenre(), savedMovie.getDuration(), savedMovie.getDescription(), savedMovie.getPosterImage(), savedMovie.getImdbId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ReturnMovieDTO(savedMovie.getId(), savedMovie.getTitle(), savedMovie.getGenre(), savedMovie.getDuration(), savedMovie.getDescription(), savedMovie.getPosterImage(), savedMovie.getImdbId(), savedMovie.getTrailerUrl()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ReturnMovieDTO> updateMovie(@PathVariable Long id, @RequestBody UpdateMovieDTO movieDetails) {
         Movie updatedMovie = movieService.updateMovie(id, movieDetails);
-        return ResponseEntity.ok(new ReturnMovieDTO(updatedMovie.getId(), updatedMovie.getTitle(), updatedMovie.getGenre(), updatedMovie.getDuration(), updatedMovie.getDescription(), updatedMovie.getPosterImage(), updatedMovie.getImdbId()));
+        return ResponseEntity.ok(new ReturnMovieDTO(updatedMovie.getId(), updatedMovie.getTitle(), updatedMovie.getGenre(), updatedMovie.getDuration(), updatedMovie.getDescription(), updatedMovie.getPosterImage(), updatedMovie.getImdbId(), updatedMovie.getTrailerUrl()));
     }
 
     @DeleteMapping("/{id}")

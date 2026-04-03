@@ -8,10 +8,11 @@ public class ReturnMovieDTO {
     private String description;
     private String posterImage;
     private String imdbId;
+    private String trailerUrl;
 
     public ReturnMovieDTO() {}
 
-    public ReturnMovieDTO(Long id, String title, String genre, Integer duration, String description, String posterImage, String imdbId) {
+    public ReturnMovieDTO(Long id, String title, String genre, Integer duration, String description, String posterImage, String imdbId, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.genre = genre;
@@ -19,6 +20,7 @@ public class ReturnMovieDTO {
         this.description = description;
         this.posterImage = posterImage;
         this.imdbId = imdbId;
+        this.trailerUrl = trailerUrl;
     }
 
     public Long getId() {
@@ -75,4 +77,11 @@ public class ReturnMovieDTO {
         this.imdbId = imdbId;
     }
 
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
+    }
 }

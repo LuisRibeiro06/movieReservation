@@ -16,7 +16,7 @@ public interface ShowTimeRepository extends JpaRepository<ShowTime, Long> {
 
     List<ShowTime> findByDate(LocalDateTime date);
 
-    Arrays findByMovie_Id(Long movieId);
+    List<ShowTime> findByMovie_Id(Long movieId);
 
     @Query("SELECT st FROM ShowTime st WHERE st.date > CURRENT_TIMESTAMP AND st.movie.id = :movieId")
     List<ShowTime> getShowTimesByMovie_Id(Long movieId);
