@@ -43,7 +43,7 @@ A full-stack movie reservation web application built with **Spring Boot** and **
 ## Features
 
 ### Public
-- Browse all available films with poster, genre, and description
+- Browse all available films with poster, genre, description and trailer
 - View upcoming sessions grouped by date
 - Search and filter sessions by film
 
@@ -67,7 +67,7 @@ A full-stack movie reservation web application built with **Spring Boot** and **
 |---|---|
 | Backend | Java 21, Spring Boot 3, Spring Security, Spring Data JPA |
 | Authentication | JWT (Auth0 java-jwt) |
-| External API | OpenFeign → OMDB API |
+| External API | OpenFeign → OMDB API and IMDBapi.dev |
 | Database | PostgreSQL (or H2 for local dev) |
 | Frontend | React 19, TypeScript, Vite |
 | Styling | Tailwind CSS v4 |
@@ -87,7 +87,7 @@ cinemax/
 │       ├── repository/          # Spring Data interfaces
 │       ├── dto/                 # Request / response objects
 │       ├── security/            # JWT filter, SecurityConfig
-│       └── client/              # Feign client → OMDB
+│       └── client/              # Feign client
 │
 └── frontend/
     └── src/
