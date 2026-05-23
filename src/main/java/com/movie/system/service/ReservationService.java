@@ -2,13 +2,16 @@ package com.movie.system.service;
 
 import com.movie.system.dto.AdminDashboardDTO;
 import com.movie.system.dto.ReservationRequestDTO;
+import com.movie.system.exception.reservation.ReservationNotFoundException;
+import com.movie.system.exception.reservation.SeatAlreadyReservedException;
+import com.movie.system.exception.session.SessionNotFoundException;
+import com.movie.system.exception.user.UserNotFoundException;
 import com.movie.system.model.*;
 import com.movie.system.repository.ReservationRepository;
 import com.movie.system.repository.SeatRepository;
 import com.movie.system.repository.ShowTimeRepository;
 import com.movie.system.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +38,7 @@ public class ReservationService {
     public List<Reservation> getAllUserReservations(){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         return reservationRepository.findByUser_Id(user.getId());
     }
@@ -46,7 +49,7 @@ public class ReservationService {
 
     public Reservation getReservationById(Long reservationId){
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
     }
 
     public AdminDashboardDTO getAdminDashboardData() {
@@ -65,10 +68,10 @@ public class ReservationService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         ShowTime showTime = showTimeRepository.findById(request.getShowTimeId())
-                .orElseThrow(() -> new RuntimeException("ShowTime not found"));
+                .orElseThrow(() -> new SessionNotFoundException("ShowTime not found"));
 
 
         List<Seat> seats = seatRepository.findAllById(request.getSeatIds());
@@ -86,7 +89,7 @@ public class ReservationService {
         boolean allSeatsAreOccupied = reservationRepository.existsByShowTimeAndSeats(request.getShowTimeId(), request.getSeatIds());
 
         if (allSeatsAreOccupied) {
-            throw new RuntimeException("Some seats are already occupied");
+            throw new SeatAlreadyReservedException("Some seats are already occupied");
         }
 
         BigDecimal totalPrice = showTime.getPrice().multiply(BigDecimal.valueOf(seats.size()));
@@ -108,10 +111,10 @@ public class ReservationService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!reservation.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("User is not the owner of this reservation");
@@ -126,7 +129,7 @@ public class ReservationService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Reserva não encontrada"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reserva não encontrada"));
 
         if (!reservation.getUser().getUsername().equals(username)) {
             throw new RuntimeException("Não autorizado");
@@ -147,7 +150,7 @@ public class ReservationService {
 
     public List<Seat> getOccupiedSeatsByShowTime(Long showTimeId){
         showTimeRepository.findById(showTimeId)
-                .orElseThrow(() -> new RuntimeException("ShowTime not found"));
+                .orElseThrow(() -> new SessionNotFoundException("ShowTime not found"));
 
         return reservationRepository.findOccupiedSeatsByShowTime(showTimeId);
     }

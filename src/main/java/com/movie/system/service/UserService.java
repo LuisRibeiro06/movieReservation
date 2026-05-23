@@ -1,5 +1,6 @@
 package com.movie.system.service;
 
+import com.movie.system.exception.user.UserNotFoundException;
 import com.movie.system.model.User;
 import com.movie.system.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,6 @@ public class UserService {
     public User getCurrentUser() {
         String username = (String) SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 }

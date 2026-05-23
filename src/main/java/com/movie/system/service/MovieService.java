@@ -7,16 +7,16 @@ import com.movie.system.dto.movieAPI.ImdbVideoApiResponse;
 import com.movie.system.dto.movieAPI.OmdbMovieDetail;
 import com.movie.system.dto.movieAPI.OmdbSearchResponse;
 import com.movie.system.dto.movieAPI.OmdbSearchResult;
+import com.movie.system.exception.movie.DuplicateMovieException;
+import com.movie.system.exception.movie.MovieNotFoundException;
 import com.movie.system.model.Movie;
 import com.movie.system.model.ShowTime;
 import com.movie.system.repository.MovieRepository;
 import com.movie.system.repository.ShowTimeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -42,7 +42,7 @@ public class MovieService {
     }
 
     public Movie getMovieById(Long id){
-        return movieRepository.findById(id).orElseThrow(() -> new RuntimeException("Movie not found"));
+        return movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
     }
 
     public List<OmdbSearchResult> searchMovies(String query){
@@ -58,13 +58,13 @@ public class MovieService {
     public Movie saveMovie(String imdbId){
 
         if (movieRepository.existsByImdbId(imdbId)) {
-            throw new RuntimeException("Movie already exists");
+            throw new DuplicateMovieException("Movie already exists");
         }
 
         OmdbMovieDetail omdbMovieDetail = movieClient.getMovieDetails(imdbId, apiKey);
 
         if (omdbMovieDetail.getResponse() == null || "False".equals(omdbMovieDetail.getResponse())) {
-            throw new RuntimeException("Movie not found");
+            throw new MovieNotFoundException("Movie not found");
         }
 
         ImdbVideoApiResponse imdbVideoApiResponse = imdbClient.getMovieVideos(imdbId);
@@ -96,7 +96,7 @@ public class MovieService {
 
     public Movie updateMovie(Long id, UpdateMovieDTO movieDetails) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + id));
+                .orElseThrow(() -> new MovieNotFoundException("Movie not found with id " + id));
 
         if (movieDetails.getTitle() != null) {
             movie.setTitle(movieDetails.getTitle());
@@ -119,7 +119,7 @@ public class MovieService {
 
     public void deleteMovie(Long movieId) {
         if (!movieRepository.existsById(movieId)) {
-            throw new RuntimeException("Movie not found");
+            throw new MovieNotFoundException("Movie not found");
         }
 
         List<ShowTime> showTimes = showTimeRepository.findByMovie_Id(movieId);
@@ -141,13 +141,12 @@ public class MovieService {
     }
 
     public List<Movie> getMoviesPlayingFromDate(LocalDateTime date){
-        List<ShowTime> AllshowTimes= showTimeRepository.findByDate(date);
+        List<Movie> movies = showTimeRepository.getMoviesPlayingFromDate(date);
 
-        List<Movie> movies= new ArrayList<>();
-
-        for (ShowTime allshowTimes : AllshowTimes){
-            movies.add(allshowTimes.getMovie());
+        if(movies.isEmpty()){
+            throw new MovieNotFoundException("No movies playing on this date");
         }
+
 
         return movies;
     }

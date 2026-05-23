@@ -1,6 +1,9 @@
 package com.movie.system.service;
 
 import com.movie.system.dto.ShowTimeDTO;
+import com.movie.system.exception.cinema_room.CinemaRoomNotFound;
+import com.movie.system.exception.movie.MovieNotFoundException;
+import com.movie.system.exception.session.SessionNotFoundException;
 import com.movie.system.model.CinemaRoom;
 import com.movie.system.model.Movie;
 import com.movie.system.model.ShowTime;
@@ -37,7 +40,7 @@ public class ShowTimeService {
 
     public ShowTimeDTO getShowTimeById(Long id){
         ShowTime showTime = showTimeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ShowTime not found"));
+                .orElseThrow(() -> new SessionNotFoundException("ShowTime not found"));
         return convertToDto(showTime);
     }
 
@@ -50,10 +53,10 @@ public class ShowTimeService {
 
     public ShowTime saveShowTime(ShowTimeDTO showTimeDTO){
         Movie movie = movieRepository.findById(showTimeDTO.getMovieId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
+                .orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
         CinemaRoom cinemaRoom = cinemaRoomRepository.findById(showTimeDTO.getCinemaRoomId())
-                .orElseThrow(() -> new RuntimeException("Cinema room not found"));
+                .orElseThrow(() -> new CinemaRoomNotFound("Cinema room not found"));
 
         ShowTime showTime = new ShowTime();
         showTime.setMovie(movie);
@@ -66,13 +69,13 @@ public class ShowTimeService {
 
     public ShowTime updateShowTime(Long id, ShowTimeDTO showTimeDTO) {
         ShowTime existingShowTime = showTimeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ShowTime not found"));
+                .orElseThrow(() -> new SessionNotFoundException("ShowTime not found"));
 
         Movie movie = movieRepository.findById(showTimeDTO.getMovieId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
+                .orElseThrow(() -> new MovieNotFoundException("Movie not found"));
 
         CinemaRoom cinemaRoom = cinemaRoomRepository.findById(showTimeDTO.getCinemaRoomId())
-                .orElseThrow(() -> new RuntimeException("Cinema room not found"));
+                .orElseThrow(() -> new CinemaRoomNotFound("Cinema room not found"));
 
         existingShowTime.setMovie(movie);
         existingShowTime.setCinemaRoom(cinemaRoom);
@@ -84,7 +87,7 @@ public class ShowTimeService {
 
     public void deleteShowTime(Long showTimeId){
         if (!showTimeRepository.existsById(showTimeId)){
-            throw new RuntimeException("ShowTime not found");
+            throw new SessionNotFoundException("ShowTime not found");
         }
 
         showTimeRepository.deleteById(showTimeId);
