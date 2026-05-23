@@ -16,8 +16,8 @@ const LoginPage = () => {
         setError('');
         setLoading(true);
         try {
-            const { token } = await login({ username, password });
-            authLogin(token);
+            await login({ username, password });
+            await authLogin();
             navigate('/');
         } catch {
             setError('Invalid username or password.');

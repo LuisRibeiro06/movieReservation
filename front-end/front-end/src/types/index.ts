@@ -27,7 +27,8 @@ export interface Movie {
 export interface CinemaRoom {
     id: number;
     name: string;
-    capacity: number;
+    numberOfRows: number;
+    seatsPerRow: number;
 }
 
 export interface Session {
@@ -61,6 +62,7 @@ export interface User {
     id: number;
     username: string;
     email: string;
+    role: string;
     reservations: Reservation[];
 }
 

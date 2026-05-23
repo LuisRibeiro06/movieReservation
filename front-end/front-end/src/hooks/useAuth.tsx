@@ -1,60 +1,68 @@
-import { useState, createContext, useContext,  useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { useState, createContext, useContext, useEffect, ReactNode } from 'react';
+import { getUserProfile } from '../services/userService';
+import { logout as logoutService } from '../services/authService';
+import type { User } from '../types';
 
-
-interface User {
-    email: string;
-    role: string;
-}
 interface AuthContextType {
     isAuthenticated: boolean;
     user: User | null;
-    loading : boolean;
-    login: (token: string) => void;
-    logout: () => void;
+    loading: boolean;
+    login: () => Promise<void>;
+    logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState< User | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
+        const checkUser = async () => {
             try {
-                const decodedToken: { sub: string, role: string } = jwtDecode(token);
-                setUser({email: decodedToken.sub, role: decodedToken.role});
+                const userData = await getUserProfile();
+                setUser(userData);
                 setIsAuthenticated(true);
             } catch (error) {
-                console.error("Error decoding token:", error);
-                localStorage.removeItem('token');
                 setUser(null);
                 setIsAuthenticated(false);
+            } finally {
+                setLoading(false);
             }
-        }
-        setLoading(false);
+        };
+        checkUser();
     }, []);
 
-    const login = (token: string) => {
-        localStorage.setItem('token', token);
-        const decodedToken: { sub: string, role: string } = jwtDecode(token);
-        setUser({ email: decodedToken.sub, role: decodedToken.role});
-        setIsAuthenticated(true);
+    const login = async () => {
+        setLoading(true);
+        try {
+            const userData = await getUserProfile();
+            setUser(userData);
+            setIsAuthenticated(true);
+        } catch (error) {
+            setUser(null);
+            setIsAuthenticated(false);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-        setIsAuthenticated(false);
+    const logout = async () => {
+        setLoading(true);
+        try {
+            await logoutService();
+            setUser(null);
+            setIsAuthenticated(false);
+        } catch (error) {
+            console.error("Logout failed", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login,loading, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

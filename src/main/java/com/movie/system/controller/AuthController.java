@@ -1,7 +1,6 @@
 package com.movie.system.controller;
 
 import com.movie.system.dto.AuthRequestDTO;
-import com.movie.system.dto.AuthResponseDTO;
 import com.movie.system.dto.RegisterDTO;
 import com.movie.system.model.Role;
 import com.movie.system.model.User;
@@ -11,7 +10,9 @@ import com.movie.system.service.LoginRateLimiterService;
 import com.movie.system.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -44,10 +47,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request){
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody AuthRequestDTO authRequestDTO, HttpServletRequest request){
         String ipAddress = request.getRemoteAddr();
         if (loginRateLimiterService.isBlocked(ipAddress)) {
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new AuthResponseDTO("Too many failed attempts. Try again in 15 minutes."));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("message", "Too many failed attempts. Try again in 15 minutes."));
         }
 
         try {
@@ -55,12 +58,21 @@ public class AuthController {
             Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
             String token = tokenService.generateToken((User) auth.getPrincipal());
+
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(24 * 60 * 60) // 7 days
+                    .sameSite("Strict")
+                    .build();
+
             loginRateLimiterService.resetAttempts(ipAddress);
 
-            return ResponseEntity.ok(new AuthResponseDTO(token));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(Map.of("message", "Login successful"));
         } catch (AuthenticationException e) {
             loginRateLimiterService.recordFailedAttempt(ipAddress);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponseDTO("Invalid username or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid username or password"));
         }
     }
 
@@ -74,5 +86,18 @@ public class AuthController {
         User user = new User(registerDTO.getUsername(), encryptedPassword, registerDTO.getEmail(), role);
         userRepository.save(user);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 }

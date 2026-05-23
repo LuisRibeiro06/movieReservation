@@ -21,7 +21,8 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser() {
         User user = userService.getCurrentUser();
-        UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getEmail());
+        String roleName = user.getRole() != null ? user.getRole().getName() : "ROLE_USER";
+        UserDTO userDTO = new UserDTO(user.getId(), user.getUsername(), user.getEmail(), roleName);
         return ResponseEntity.ok(userDTO);
     }
 }

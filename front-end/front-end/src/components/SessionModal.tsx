@@ -64,39 +64,39 @@ export default function SessionModal({ session, movies, cinemaRooms, onClose, on
     }
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold mb-4">{session.id ? 'Edit' : 'Add'} Session</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Movie</label>
-                        <select name="movieId" value={formData.movieId} onChange={handleChange} className="w-full p-2 border rounded">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div className="bg-[var(--color-card)] border border-white/10 rounded-[18px] p-8 w-full max-w-md">
+                <h2 className="font-[var(--font-display)] text-[1.8rem] tracking-widest mb-6 text-center text-white">{session.id ? 'Edit' : 'Add'} Session</h2>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div>
+                        <label className="block text-[0.76rem] font-semibold tracking-[0.08em] uppercase text-[var(--color-t2)] mb-1.5">Movie</label>
+                        <select name="movieId" value={formData.movieId} onChange={handleChange} className="w-full px-4 py-3 bg-[var(--color-surface)] border border-white/10 rounded-lg text-[var(--color-t1)] outline-none focus:border-[var(--color-accent)]">
                             <option value="">Select a Movie</option>
                             {movies.map(movie => (
                                 <option key={movie.id} value={movie.id}>{movie.title}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Cinema Room</label>
-                        <select name="cinemaRoomId" value={formData.cinemaRoomId} onChange={handleChange} className="w-full p-2 border rounded">
+                    <div>
+                        <label className="block text-[0.76rem] font-semibold tracking-[0.08em] uppercase text-[var(--color-t2)] mb-1.5">Cinema Room</label>
+                        <select name="cinemaRoomId" value={formData.cinemaRoomId} onChange={handleChange} className="w-full px-4 py-3 bg-[var(--color-surface)] border border-white/10 rounded-lg text-[var(--color-t1)] outline-none focus:border-[var(--color-accent)]">
                             <option value="">Select a Room</option>
                             {cinemaRooms.map(room => (
                                 <option key={room.id} value={room.id}>{room.name}</option>
                             ))}
                         </select>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Date</label>
-                        <input type="datetime-local" name="date" value={formData.date} onChange={handleChange} className="w-full p-2 border rounded" />
+                    <div>
+                        <label className="block text-[0.76rem] font-semibold tracking-[0.08em] uppercase text-[var(--color-t2)] mb-1.5">Date</label>
+                        <input type="datetime-local" name="date" value={formData.date} onChange={handleChange} className="w-full px-4 py-3 bg-[var(--color-surface)] border border-white/10 rounded-lg text-[var(--color-t1)] outline-none focus:border-[var(--color-accent)]" />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Price</label>
-                        <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full p-2 border rounded" />
+                    <div>
+                        <label className="block text-[0.76rem] font-semibold tracking-[0.08em] uppercase text-[var(--color-t2)] mb-1.5">Price</label>
+                        <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-3 bg-[var(--color-surface)] border border-white/10 rounded-lg text-[var(--color-t1)] outline-none focus:border-[var(--color-accent)]" />
                     </div>
-                    <div className="flex justify-end">
-                        <button type="button" onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
-                        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+                    <div className="flex justify-end gap-4 mt-4">
+                        <button type="button" onClick={onClose} className="px-6 py-2 rounded-lg border border-white/10 text-[var(--color-t2)] hover:bg-white/5">Cancel</button>
+                        <button type="submit" className="px-6 py-2 rounded-lg bg-[var(--color-accent)] text-[#0a0810] font-semibold hover:bg-[#f0b030]">Save</button>
                     </div>
                 </form>
             </div>

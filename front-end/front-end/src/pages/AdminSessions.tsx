@@ -17,7 +17,7 @@ export default function AdminSessions() {
 
     const fetchData = async () => {
         setLoading(true);
-        setError(null); // ← limpar erro anterior antes de retry
+        setError(null);
         try {
             const [sessionsData, moviesData, cinemaRoomsData] = await Promise.all([
                 getSessions(),
@@ -78,62 +78,73 @@ export default function AdminSessions() {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="min-h-[80vh] flex items-center justify-center">Loading...</div>;
     }
 
     if (error) {
-        return ErrorState({ message: error, onRetry: fetchData });
+        return <ErrorState message={error} onRetry={fetchData} />;
     }
 
     const getMovieTitle = (movieId: number) => movies.find(movie => movie.id === movieId)?.title || 'Unknown Movie';
     const getCinemaRoomName = (roomId: number) => cinemaRooms.find(room => room.id === roomId)?.name || 'Unknown Room';
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Admin Sessions</h1>
-            <div className="mb-4">
-                <button
-                    onClick={() => handleOpenModal({})}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                    Add New Session
-                </button>
+        <div className="min-h-[80vh] flex flex-col items-center justify-center px-8 relative text-white">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none"
+                 style={{ background: 'radial-gradient(ellipse, rgba(232,160,32,0.05) 0%, transparent 70%)' }} />
+
+            <div className="fade-up w-full max-w-6xl bg-[var(--color-card)] border border-white/7 rounded-[18px] p-10 my-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="font-[var(--font-display)] text-[2rem] tracking-widest">Manage Sessions</h1>
+                    <button
+                        onClick={() => handleOpenModal({})}
+                        className="px-6 py-3 rounded-lg bg-[var(--color-accent)] text-[#0a0810] font-semibold hover:bg-[#f0b030]"
+                    >
+                        Add New Session
+                    </button>
+                </div>
+
+                <div className="bg-[var(--color-surface)] border border-white/10 rounded-lg p-6">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full text-left">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="p-4 text-[var(--color-t2)]">Movie</th>
+                                    <th className="p-4 text-[var(--color-t2)]">Room</th>
+                                    <th className="p-4 text-[var(--color-t2)]">Date</th>
+                                    <th className="p-4 text-[var(--color-t2)]">Price</th>
+                                    <th className="p-4 text-right text-[var(--color-t2)]">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-[var(--color-t1)]">
+                                {sessions.map(session => (
+                                    <tr key={session.id} className="border-b border-white/10 last:border-b-0 hover:bg-white/5">
+                                        <td className="p-4">{getMovieTitle(session.movieId)}</td>
+                                        <td className="p-4">{getCinemaRoomName(session.cinemaRoomId)}</td>
+                                        <td className="p-4">{new Date(session.date).toLocaleString()}</td>
+                                        <td className="p-4">${session.price.toFixed(2)}</td>
+                                        <td className="p-4 text-right space-x-2">
+                                            <button
+                                                onClick={() => handleOpenModal(session)}
+                                                className="text-green-500 hover:text-green-700 bg-green-50/10 px-3 py-1 rounded"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(session.id)}
+                                                className="text-red-500 hover:text-red-700 bg-red-50/10 px-3 py-1 rounded"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <table className="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th className="py-2">Movie</th>
-                        <th className="py-2">Room</th>
-                        <th className="py-2">Date</th>
-                        <th className="py-2">Price</th>
-                        <th className="py-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {sessions.map(session => (
-                        <tr key={session.id}>
-                            <td className="border px-4 py-2">{getMovieTitle(session.movieId)}</td>
-                            <td className="border px-4 py-2">{getCinemaRoomName(session.cinemaRoomId)}</td>
-                            <td className="border px-4 py-2">{new Date(session.date).toLocaleString()}</td>
-                            <td className="border px-4 py-2">${session.price.toFixed(2)}</td>
-                            <td className="border px-4 py-2">
-                                <button
-                                    onClick={() => handleOpenModal(session)}
-                                    className="bg-green-500 text-white px-2 py-1 rounded mr-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(session.id)}
-                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
             {isModalOpen && (
                 <SessionModal
                     session={selectedSession}

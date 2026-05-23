@@ -2,27 +2,15 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+    withCredentials: true,
 });
 
-// Request interceptor to add the token to headers
-api.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-}, error => {
-    return Promise.reject(error);
-});
-
-// Response interceptor to handle errors
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 403) {
-            localStorage.removeItem('token');
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Lógica de logout visual no front-end
             window.location.href = '/login';
-            console.error("Forbidden error:", error.response.data);
         }
         return Promise.reject(error);
     }

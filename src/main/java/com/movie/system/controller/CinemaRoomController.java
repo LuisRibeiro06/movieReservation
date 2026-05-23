@@ -1,5 +1,6 @@
 package com.movie.system.controller;
 
+import com.movie.system.dto.CreateCinemaRoomDTO;
 import com.movie.system.model.CinemaRoom;
 import com.movie.system.service.CinemaRoomService;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,8 @@ public class CinemaRoomController {
     }
 
     @PostMapping
-    public ResponseEntity<CinemaRoom> createCinemaRoom(@RequestBody CinemaRoom cinemaRoom) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cinemaRoomService.saveCinemaRoom(cinemaRoom));
+    public ResponseEntity<CinemaRoom> createCinemaRoom(@RequestBody CreateCinemaRoomDTO cinemaRoomDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(cinemaRoomService.createCinemaRoomAndSeats(cinemaRoomDTO));
     }
 
     @DeleteMapping("/{id}")
