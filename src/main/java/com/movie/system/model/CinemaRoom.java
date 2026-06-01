@@ -1,5 +1,6 @@
 package com.movie.system.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,9 +26,13 @@ public class CinemaRoom {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "capacity", nullable = false)
-    private int capacity;
+    @Column(name = "number_of_rows")
+    private Integer numberOfRows;
+
+    @Column(name = "seats_per_row")
+    private Integer seatsPerRow;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Seat> seats;
 }

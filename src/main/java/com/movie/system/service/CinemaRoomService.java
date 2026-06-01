@@ -38,10 +38,12 @@ public class CinemaRoomService {
                 .orElseThrow(() -> new CinemaRoomNotFound("Cinema room not found"));
     }
 
+    @Transactional
     public CinemaRoom createCinemaRoomAndSeats(CreateCinemaRoomDTO cinemaRoomDTO){
         CinemaRoom cinemaRoom = new CinemaRoom();
         cinemaRoom.setName(cinemaRoomDTO.getName());
-        cinemaRoom.setCapacity(cinemaRoomDTO.getNumberOfRows() * cinemaRoomDTO.getSeatsPerRow());
+        cinemaRoom.setNumberOfRows(cinemaRoomDTO.getNumberOfRows());
+        cinemaRoom.setSeatsPerRow(cinemaRoomDTO.getSeatsPerRow());
         cinemaRoom = cinemaRoomRepository.save(cinemaRoom);
 
         List<Seat> seats = new ArrayList<>();

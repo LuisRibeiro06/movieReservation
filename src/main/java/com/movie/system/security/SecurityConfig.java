@@ -36,20 +36,23 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
-                        // Regras específicas para /api/movies primeiro
+                        // Regras específicas para /api/movies
                         .requestMatchers("/api/movies/search").hasRole("ADMIN")
                         .requestMatchers("/api/movies/import").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/movies/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/movies/{id}").hasRole("ADMIN")
-                        // Regra geral para os outros GETs de /api/movies
                         .requestMatchers(HttpMethod.GET, "/api/movies", "/api/movies/playing", "/api/movies/{id}").permitAll()
+                        // Regras específicas para /api/cinema-rooms
+                        .requestMatchers(HttpMethod.GET, "/api/cinema-rooms", "/api/cinema-rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/cinema-rooms").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/cinema-rooms/**").hasRole("ADMIN")
                         // Outras regras
-                        .requestMatchers("/api/cinema-rooms/**").hasRole("ADMIN")
                         .requestMatchers("/api/seats/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/showtimes/**").permitAll()
                         .requestMatchers("/api/reservations/admin/dashboard").hasRole("ADMIN")
                         .requestMatchers("/api/reservations/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/chat").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

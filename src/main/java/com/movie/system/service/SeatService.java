@@ -10,7 +10,6 @@ import com.movie.system.repository.SeatRepository;
 import com.movie.system.repository.ShowTimeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Set;

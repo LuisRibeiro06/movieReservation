@@ -1,5 +1,6 @@
 package com.movie.system.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,15 +20,14 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(name = "seatRow", nullable = false)
     private String seatRow;
 
     @Column(name = "seatNumber", nullable = false)
     private Integer seatNumber;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomId", nullable = false)
+    @JsonBackReference
     private CinemaRoom room;
 }
