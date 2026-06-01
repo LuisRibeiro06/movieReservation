@@ -40,6 +40,9 @@ export default function AdminDashboardPage() {
 
     const { totalReservations, totalRevenue, allReservations } = dashboardData;
 
+    const safeTotalRevenue = totalRevenue || 0;
+    const safeAllReservations = allReservations || [];
+
     return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center px-8 relative text-white">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none"
@@ -51,11 +54,11 @@ export default function AdminDashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="bg-[var(--color-surface)] border border-white/10 rounded-lg p-6">
                         <h2 className="text-lg font-semibold text-[var(--color-t2)]">Total Reservations</h2>
-                        <p className="text-3xl font-bold text-[var(--color-t1)]">{totalReservations}</p>
+                        <p className="text-3xl font-bold text-[var(--color-t1)]">{totalReservations || 0}</p>
                     </div>
                     <div className="bg-[var(--color-surface)] border border-white/10 rounded-lg p-6">
                         <h2 className="text-lg font-semibold text-[var(--color-t2)]">Total Revenue</h2>
-                        <p className="text-3xl font-bold text-[var(--color-t1)]">${totalRevenue.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-[var(--color-t1)]">${safeTotalRevenue.toFixed(2)}</p>
                     </div>
                 </div>
 
@@ -73,17 +76,25 @@ export default function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {allReservations.map((reservation: Reservation) => (
-                                    <tr key={reservation.id} className="border-b border-white/10 last:border-b-0">
-                                        <td className="p-4">{reservation.id}</td>
-                                        <td className="p-4">{reservation.user.username}</td>
-                                        <td className="p-4">{reservation.showTime.movieTitle}</td>
-                                        <td className="p-4">{new Date(reservation.showTime.date).toLocaleString()}</td>
-                                        <td className="p-4">
-                                            {reservation.seats.map(seat => `${seat.seatRow}${seat.seatNumber}`).join(', ')}
-                                        </td>
+                                {safeAllReservations.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="p-4 text-center text-[var(--color-t3)]">No reservations found.</td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    safeAllReservations.map((reservation: Reservation) => (
+                                        <tr key={reservation.id} className="border-b border-white/10 last:border-b-0">
+                                            <td className="p-4">{reservation.id}</td>
+                                            <td className="p-4">{reservation.user?.username || 'Unknown'}</td>
+                                            <td className="p-4">{reservation.showTime?.movieTitle || 'Unknown'}</td>
+                                            <td className="p-4">{reservation.showTime?.date ? new Date(reservation.showTime.date).toLocaleString() : 'Unknown'}</td>
+                                            <td className="p-4">
+                                                {reservation.seats && reservation.seats.length > 0 
+                                                    ? reservation.seats.map(seat => `${seat.seatRow}${seat.seatNumber}`).join(', ')
+                                                    : 'N/A'}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>

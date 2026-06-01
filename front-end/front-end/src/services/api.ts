@@ -8,10 +8,6 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // Lógica de logout visual no front-end
-            window.location.href = '/login';
-        }
         return Promise.reject(error);
     }
 );

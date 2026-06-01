@@ -11,12 +11,12 @@ export default function AdminCinemaRooms() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCinemaRooms = async () => {
+    const   fetchCinemaRooms = async () => {
         setLoading(true);
         setError(null);
         try {
             const data = await getAllCinemaRooms();
-            setCinemaRooms(data);
+            setCinemaRooms(Array.isArray(data) ? data : []);
         } catch (err) {
             setError('Failed to fetch cinema rooms.');
         } finally {
@@ -34,11 +34,11 @@ export default function AdminCinemaRooms() {
             return;
         }
         try {
-            const newRoom = await createCinemaRoom({ name: newRoomName, numberOfRows: newRoomRows, seatsPerRow: newRoomSeatsPerRow });
-            setCinemaRooms([...cinemaRooms, newRoom]);
+            await createCinemaRoom({ name: newRoomName, numberOfRows: newRoomRows, seatsPerRow: newRoomSeatsPerRow });
             setNewRoomName('');
             setNewRoomSeatsPerRow(0);
             setNewRoomRows(0);
+            await fetchCinemaRooms(); // Recarrega a lista
         } catch (err) {
             setError('Failed to create cinema room.');
             console.error(err);

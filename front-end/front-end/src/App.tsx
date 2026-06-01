@@ -15,34 +15,39 @@ import AdminDashboardPage from "./pages/AdminDashboard.tsx";
 import SessionPage from "./pages/SessionPage.tsx";
 import CartPage from "./pages/CartPage.tsx";
 import UserProfilePage from "./pages/UserProfilePage.tsx";
+import ChatWidget from "./components/ChatWidget.tsx";
+import { AuthProvider } from './hooks/useAuth';
 
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/movie/:id" element={<MoviePage />} />
-            <Route path="/sessions" element={<SessionsPage />} />
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/movie/:id" element={<MoviePage />} />
+              <Route path="/sessions" element={<SessionsPage />} />
               <Route path={"/session/:id"} element={<SessionPage />}/>
               <Route path={"/cart/:id"} element={<CartPage />}/>
               <Route path="/profile" element={<UserProfilePage />} />
               <Route element={<AdminRoute />}>
-                  <Route element={<AdminLayout />}>
-                      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-                      <Route path="/admin/movies" element={<AdminMovies />} />
-                      <Route path="/admin/sessions" element={<AdminSessions/>} />
-                      <Route path="/admin/cinema-rooms" element={<AdminCinemaRooms />} />
-                  </Route>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                  <Route path="/admin/movies" element={<AdminMovies />} />
+                  <Route path="/admin/sessions" element={<AdminSessions/>} />
+                  <Route path="/admin/cinema-rooms" element={<AdminCinemaRooms />} />
+                </Route>
               </Route>
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+            </Routes>
+          </main>
+          <ChatWidget />
+          <Footer />
+        </div>
+      </AuthProvider>
     </Router>
   );
 }
